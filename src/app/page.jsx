@@ -1,22 +1,24 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
-import cities from "../cities";
-import CitySelector from "./components/CitySelector";
 import PrayerTimeCard from "./components/PrayerTimeCard";
 import ErrorMessage from "./components/ErrorMessage";
 import CitySearch from "./components/CitySearch";
 
 // Komponen Utama
 export default function Home() {
-  const [selectedCity, setSelectedCity] = useState(cities[43].code);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedCityName, setSelectedCityName] = useState("");
   const [jadwalShalat, setJadwalShalat] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const today = new Date().toISOString().split("T")[0];
 
+  // Fetch jadwal shalat ketika kota dipilih
   useEffect(() => {
+    if (!selectedCity) return;
+
     const abortController = new AbortController();
 
     const fetchJadwal = async () => {
@@ -47,26 +49,24 @@ export default function Home() {
     return () => abortController.abort();
   }, [selectedCity, today]);
 
-  const selectedCityName = cities.find(
-    (city) => city.code === selectedCity
-  )?.name;
-  console.log(jadwalShalat);
 
-  const handleCitySelect = (cityCode) => {
-    setSelectedCity(cityCode);
-  };
+const handleCitySelect = (cityData) => {
+  setSelectedCity(cityData.id);
+  setSelectedCityName(cityData.lokasi);
+  console.log(selectedCityName);
+};
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
           Jadwal Shalat
         </h1>
-        {/* <CitySearch onCitySelect={handleCitySelect}/> */}
+         <CitySearch onCitySelect={handleCitySelect}/>
 
-        <CitySelector
+        {/* <CitySelector
           value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
-        />
+        /> */}
 
         <div className="bg-white rounded-lg p-6 shadow-md">
           {loading && <LoadingSpinner />}
@@ -98,3 +98,5 @@ export default function Home() {
     </div>
   );
 }
+
+

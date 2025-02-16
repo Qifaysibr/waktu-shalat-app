@@ -1,6 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
-import cities from "@/cities";
+import { useState, useEffect } from "react";
 
 export default function CitySearch({ onCitySelect }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -8,30 +7,44 @@ export default function CitySearch({ onCitySelect }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchCities = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          "https://api.myquran.com/v2/sholat/kota/semua"
-        );
-        const data = await response.json();
-        setCities(data.data);
-        console.log("Cities : ", data);
-      } catch (error) {
-        console.error("Error fetching cities:", error);
+    const debounceTimer = setTimeout(() => {
+      if (searchTerm.trim()) {
+        const abortController = new AbortController();
+
+        setLoading(true);
+        fetch(
+          `https://api.myquran.com/v2/sholat/kota/cari/${encodeURIComponent(
+            searchTerm
+          )}`,
+          {
+            signal: abortController.signal,
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status && data.data) {
+              setCities(data.data);
+            } else {
+              setCities([]);
+            }
+          })
+          .catch((error) => {
+            if (error.name !== "AbortError") {
+              console.error("Error fetching cities:", error);
+              setCities([]);
+            }
+          })
+          .finally(() => setLoading(false));
+
+        return () => abortController.abort();
+      } else {
+        setCities([]);
+        setLoading(false);
       }
-      setLoading(false);
-    };
+    }, 300);
 
-    fetchCities();
-  }, []);
-
-  const filteredCities = useMemo(() => {
-    return cities.filter((city) =>
-      city.lokasi?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, cities]);
-  console.log("filtered:", filteredCities);
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm]);
 
   return (
     <div className="mb-4">
@@ -43,15 +56,15 @@ export default function CitySearch({ onCitySelect }) {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
       {console.log("Search term:", searchTerm)}
-      {loading ? (
-        <div className="text-center text-gray-500">Memuat daftar kota...</div>
-      ) : (
-        <div className="max-h-60 overflow-y-auto mt-2">
-          {filteredCities.map((city) => (
+      {loading && <div className="mt-2">Loading...</div>}
+
+      {!loading && cities.length > 0 && (
+        <div className="max-h-60 overflow-y-auto mt-2 border rounded-md">
+          {cities.map((city) => (
             <div
               key={city.id}
-              onChange={() => onCitySelect(city.id)}
-              className="p-3 hover:bg-blue-50 cursor-pointer"
+              onClick={() => onCitySelect(city)}
+              className="p-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
             >
               <span className="font-medium">{city.nama}</span>
               <span className="text-sm text-gray-500 ml-2">
@@ -60,6 +73,10 @@ export default function CitySearch({ onCitySelect }) {
             </div>
           ))}
         </div>
+      )}
+
+      {!loading && searchTerm && cities.length === 0 && (
+        <div className="mt-2">Tidak ada kota/kabupaten yang cocok.</div>
       )}
     </div>
   );
