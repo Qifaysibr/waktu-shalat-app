@@ -56,11 +56,14 @@ const handleCitySelect = (cityData) => {
   console.log(selectedCityName);
 };
   return (
-    <div className="bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
+    <div className="bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 h-screen bg-[url(/islamic-pattern.svg)] bg-no-repeat bg-cover">
+      <div className="p-10 max-w-2xl mx-auto md:mt-24 bg-blue-100 rounded-xl bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-0 border border-gray-500">
+        <div className={'flex justify-center items-center '}>
+
+        <h1 className="text-3xl font-bold text-center text-gray-50 mb-8 bg-blue-900 px-4 py-2 rounded-lg w-1/2 z-50">
           Jadwal Shalat
         </h1>
+        </div>
          <CitySearch onCitySelect={handleCitySelect}/>
 
         {/* <CitySelector

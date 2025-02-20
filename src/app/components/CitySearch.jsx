@@ -55,7 +55,6 @@ export default function CitySearch({ onCitySelect }) {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      {console.log("Search term:", searchTerm)}
       {loading && <div className="mt-2">Loading...</div>}
 
       {!loading && cities.length > 0 && (
@@ -64,11 +63,11 @@ export default function CitySearch({ onCitySelect }) {
             <div
               key={city.id}
               onClick={() => onCitySelect(city)}
-              className="p-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
+              className="p-3 hover:bg-yellow-600  cursor-pointer border-b last:border-b-0 bg-yellow-800"
             >
               <span className="font-medium">{city.nama}</span>
-              <span className="text-sm text-gray-500 ml-2">
-                ({city.lokasi})
+              <span className="text-sm text-gray-100 ml-2 ">
+                {city.lokasi}
               </span>
             </div>
           ))}
@@ -76,7 +75,7 @@ export default function CitySearch({ onCitySelect }) {
       )}
 
       {!loading && searchTerm && cities.length === 0 && (
-        <div className="mt-2">Tidak ada kota/kabupaten yang cocok.</div>
+        <div className="mt-2 text-gray-500">Tidak ada kota/kabupaten yang cocok.</div>
       )}
     </div>
   );
